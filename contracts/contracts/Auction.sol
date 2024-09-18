@@ -24,6 +24,7 @@ contract Auction{
         string description;
         uint256 startTime;
         uint256 endTime;
+        uint256 startingPrice;
         AuctionStatus status;
     }
 
@@ -42,7 +43,7 @@ contract Auction{
     event BidSubmitted(uint256 auctionId, address bider);
     event AuctionEnded(uint256 auctionId, address winner);
 
-    function createAuction(string memory _name, string memory _description, uint256 _startTime, uint256 _endTime) public returns (uint256){
+    function createAuction(string memory _name, string memory _description, uint256 _startTime, uint256 _endTime, uint256 _startingPrice) public returns (uint256){
 
         AuctionCounter++;
 
@@ -53,7 +54,9 @@ contract Auction{
             description : _description,
             startTime : _startTime,
             endTime : _endTime,
+            startingPrice : _startingPrice,
             status : AuctionStatus.OPEN
+
         });
 
         emit AuctionCreated(AuctionCounter, msg.sender);
