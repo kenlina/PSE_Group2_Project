@@ -1,0 +1,33 @@
+/* globals.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+    --background: #ffffff;
+    --foreground: #171717;
+    --primary: #5c67f2;  /* 添加一个主题色 */
+    --secondary: #f26419; /* 添加一个次级色 */
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --background: #0a0a0a;
+        --foreground: #ededed;
+    }
+}
+
+body {
+    color: var(--foreground);
+    background: var(--background);
+    font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+}
+
+@layer utilities {
+    .text-balance {
+        text-wrap: balance;
+    }
+    .custom-shadow { /* 添加自定义阴影 */
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+}
