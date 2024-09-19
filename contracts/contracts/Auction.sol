@@ -82,7 +82,7 @@ contract Auction{
         emit BidSubmitted(_auctionID, msg.sender);
     }
 
-    function revealBids(uint256 _auctionID, RevealedBid[] calldata _revealedBids) public{
+    function revealBids(uint256 _auctionID, RevealBid[] calldata _revealedBids) public{
 
         require(_revealedBids.length == bids[_auctionID].length, "Reveal data mismatch");
 
@@ -91,9 +91,9 @@ contract Auction{
 
         for(uint256 i = 0; i < bids[_auctionID].length; i++){
             Bid storage bid = bids[_auctionID][i];
-            RevealedBid memory revealed = _revealedBids[i];
+            RevealBid memory revealed = _revealedBids[i];
 
-            uint256 bidValue = recoverBidValue(bid.commitment, revealed.revealBid, revealed.randomNum );
+            uint256 bidValue = recoverBidValue(bid.commitment, revealed.revealedBid, revealed.randomNum );
 
             if(bidValue > highestBidValue){
                 highestBidValue = bidValue;
