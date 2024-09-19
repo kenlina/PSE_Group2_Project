@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { generateCommitment, generateFullProof } from "../../lib/proof";
 import { type Proof } from "@/config/proof";
+import { useRouter, useSearchParams } from 'next/navigation';
 
 
 const GenerateProof: React.FC = () => {
@@ -11,8 +12,10 @@ const GenerateProof: React.FC = () => {
   const [proof, setProof] = useState<Proof>();
   const [success, setSuccess] = useState<boolean>(true);
 
-
-
+  const router = useRouter();
+  const param = useSearchParams();
+  const accountIndex = param.get('accountIndex');
+  console.log(accountIndex);
   const handleSubmit = async (event: React.FormEvent) => {
     console.log("triggered");
     event.preventDefault();

@@ -1,7 +1,7 @@
 // src/hooks/useContract.ts
 import { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
-import { getContract } from './ethereum';
+import { getContract , listAllAccounts } from './ethereum';
 
 export const useContract = () => {
     const [contract, setContract] = useState<ethers.Contract | null>(null);
@@ -17,6 +17,8 @@ export const useContract = () => {
 
                 const counter = await loadedContract.AuctionCounter();
                 setAuctionCounter(counter.toNumber());
+
+                listAllAccounts();
 
                 loadedContract.on('AuctionCreated', (result) => {
                     console.log('Event triggered:', result);
