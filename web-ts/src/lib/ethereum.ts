@@ -1,4 +1,4 @@
-import data from '../../../contracts/artifacts/contracts/Auction.sol/Auction.json';
+// import data from '../../../contracts/artifacts/contracts/Auction.sol/Auction.json';
 import { ethers } from "ethers";
 
 const HARDHAT_NETWORK_URL = 'http://127.0.0.1:8545/';

@@ -10,12 +10,16 @@
   },
   "dependencies": {
     "@tanstack/react-query": "^5.56.2",
+    "@types/snarkjs": "^0.7.8",
     "@wagmi/connectors": "^5.1.11",
     "@wagmi/core": "^2.13.5",
+    "axios": "^1.7.7",
+    "circomlibjs": "^0.1.7",
     "ethers": "5.7",
     "next": "14.2.11",
     "react": "^18",
     "react-dom": "^18",
+    "snarkjs": "^0.7.4",
     "viem": "^2.21.8",
     "wagmi": "^2.12.12",
     "web3": "^4.12.1"

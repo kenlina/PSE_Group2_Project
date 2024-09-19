@@ -1,21 +1,24 @@
 "use client"
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useContract } from '../lib/useContract';
+import {} from "../lib/proof"
 
 export default function Home() {
+    const router = useRouter();
     const { contract, loading, auctionCounter } = useContract();
     const [creating, setCreating] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     const [revealing, setRevealing] = useState(false);
 
-    const create = async (name, description, startTime, endTime) => {
+    const create = async (name, description, startTime, endTime, startPrice) => {
         if (!contract) {
             console.error("Contract is not initialized.");
             return;
         }
         try {
             setCreating(true);
-            const tx = await contract.createAuction(name, description, startTime, endTime);
+            const tx = await contract.createAuction(name, description, startTime, endTime, startPrice);
             await tx.wait();
             console.log('Auction Created: ', tx);
             setCreating(false);
@@ -58,15 +61,16 @@ export default function Home() {
             setRevealing(false);
         }
     };
+    
 
     return (
         <div className="p-4 max-w-lg mx-auto">
             {!loading ? (
                 <div className="space-y-2">
                     <h1>Auction Num: {auctionCounter}</h1>
-                    <button disabled={creating} onClick={() => create("Product Name", "Description here", Date.now(), Date.now() + 10000)}>
+                    <button disabled={creating} onClick={() => create("Product Name", "Description here", Date.now(), Date.now() + 10000, 10)}>
                         {creating ? "Creating..." : "Create Auction"}
-                    </button> 
+                    </button> <br></br>
                     <button disabled={submitting} onClick={() => submitBid(1, "proofHere", ["pubSignal1"], 12345)}>
                         {submitting ? "Submitting..." : "Submit Bid"}
                     </button><br></br>
@@ -78,6 +82,11 @@ export default function Home() {
             ) : (
                 <p>Loading...</p>
             )}
+            <br></br><br></br>
+            <div>
+            <h1>歡迎來到首頁！</h1>
+            <button onClick={() => router.push('/proof')}>產生proof</button>
+            </div>
         </div>
     );
 }
