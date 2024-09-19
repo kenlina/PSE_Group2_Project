@@ -52,6 +52,24 @@ export function toOnChainProof(proof: PlonkProof): Proof["proof"] {
   ];
 }
 
+export async function generateCommitment(
+    bid: string,
+    random: string,
+  ): string {
+    const wasm = "/circuit_artifact/poseidon.wasm"
+    const zkey = "/circuit_artifact/poseidon_final.zkey"
+    const fullProof = await plonk.fullProve({ 
+          bid:    bid,
+          random: random,
+      },
+      wasm,
+      zkey
+    );
+  
+    // Convert fullProof.proof to a format suitable for on-chain submission
+    return fullProof.publicSignals[0] as string;
+  }
+
 export async function generateFullProof(
   random: string,
   bid: string,
