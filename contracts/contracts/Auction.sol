@@ -63,9 +63,9 @@ contract Auction{
         return AuctionCounter;
     }
 
-    function summitBid(uint256 _auctionID, bytes memory proof, uint[] memory pubSignals, uint256 _commitment) public{
+    function summitBid(uint256 _auctionID, uint256[24] calldata _proof, uint256[2] calldata _pubSignals, uint256 _commitment) public{
 
-        require(verifier.verifyProof(proof, pubSignals),"Invaild");
+        require(verifier.verifyProof(_proof, _pubSignals),"Invaild");
 
         bids[_auctionID].push(
             Bid({

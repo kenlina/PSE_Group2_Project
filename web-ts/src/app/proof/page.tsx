@@ -3,31 +3,27 @@ import React, { useState } from 'react';
 import { generateCommitment, generateFullProof } from "../../lib/proof";
 import { type Proof } from "@/config/proof";
 
-interface ProofProps {
-    proof: {
-      proof: string[];
-      publicSignals: string[];
-    };
-}
 
 const GenerateProof: React.FC = () => {
   const [random, setRandom] = useState('');
   const [bid, setBid] = useState('');
   const [reserve, setReserve] = useState('');
   const [proof, setProof] = useState<Proof>();
-  
+  const [success, setSuccess] = useState<boolean>(true);
+
 
 
   const handleSubmit = async (event: React.FormEvent) => {
-    console.log("tri");
+    console.log("triggered");
     event.preventDefault();
     try {
         const PoseidonHash = await generateCommitment(bid, random);
         const fullProof = await generateFullProof(random, bid, reserve, PoseidonHash);
         setProof(fullProof);
-        console.log("done", PoseidonHash);
+        setSuccess(true)
     } catch (error) {
       console.error('Error generating proof:', error);
+      setSuccess(false)
     }
   };
 
@@ -48,6 +44,13 @@ const GenerateProof: React.FC = () => {
         <h4>Public Signals:</h4>
         <p>Reserve: {proof.publicSignals[0]}</p>
         <p>Commit: {proof.publicSignals[1]}</p>
+      </div>
+    )}
+    {!success && (
+        <div style={{ marginTop: '20px', padding: '10px', backgroundColor: '#f4f4f4', borderRadius: '5px' }}>
+        <h3>Generate Proof Error!!</h3>
+        <h4>Please check input again</h4>
+        
       </div>
     )}
     </div>
