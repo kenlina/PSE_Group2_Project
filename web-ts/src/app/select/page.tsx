@@ -1,26 +1,42 @@
 "use client"
 // pages/choose-role.tsx
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation'; 
+import React from 'react';
 
-const ChooseRole: React.FC = () => {
-//   const router = useRouter();
+const ChooseRole = () => {
+    const router = useRouter();  // 將 useRouter 放在組件函數內部使用
 
-  const handleSelectRole = (role: 'seller' | 'bidder') => {
-    // 這裡可以導航到不同的路由，或者處理角色選擇後的邏輯
-    console.log(`Selected role: ${role}`);
-    // 例如： router.push(`/${role}`);
-  };
+    const handleSelectRole = (role: 'seller' | 'bidder') => {
+        console.log(`Selected role: ${role}`);
+        const nextRoute = role === 'seller' ? "/seller" : "/products"; // 確保路徑正確
+        router.push(nextRoute);  // 使用變量導航
+    };
 
-  return (
-    <div style={{ display: 'flex', justifyContent: 'center' }}>
-      <button  onClick={() => handleSelectRole('seller')}>
-        Seller
-      </button>
-      <button  onClick={() => handleSelectRole('bidder')}>
-        Bidder
-      </button>
-    </div>
-  );
+    return (
+        <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <button onClick={() => handleSelectRole('seller')} style={buttonStyle}>
+                Seller
+            </button>
+            <button onClick={() => handleSelectRole('bidder')} style={buttonStyle}>
+                Bidder
+            </button>
+        </div>
+    );
+};
+
+const buttonStyle: React.CSSProperties = {
+    backgroundColor: '#4CAF50',
+    border: 'none',
+    color: 'white',
+    padding: '15px 32px',
+    textAlign: 'center',
+    textDecoration: 'none',
+    fontSize: '16px',
+    margin: '4px',
+    cursor: 'pointer',
+    borderRadius: '12px',
+    boxShadow: '2px 5px 10px rgba(0,0,0,0.2)',
+    transition: 'all 0.3s'
 };
 
 export default ChooseRole;

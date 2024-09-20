@@ -15,7 +15,6 @@ const GenerateProof: React.FC = () => {
   const router = useRouter();
   const param = useSearchParams();
   const accountIndex = param.get('accountIndex');
-  console.log(accountIndex);
   const handleSubmit = async (event: React.FormEvent) => {
     console.log("triggered");
     event.preventDefault();

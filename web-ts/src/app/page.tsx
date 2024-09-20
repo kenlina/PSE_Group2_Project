@@ -23,7 +23,7 @@ export default function Home() {
         // You might want to perform additional operations on login
         loadSigner();
         console.log(`Logged in with account ${accountIndex}`);
-        const next_page = "/proof?accountIndex="+accountIndex;
+        const next_page = "/select?accountIndex="+accountIndex;
         router.push(next_page); // Assuming you have a dashboard route
     };
 
