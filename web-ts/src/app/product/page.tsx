@@ -24,17 +24,23 @@ const formatDate = (timestamp) => {
 export default function Home() {
     const router = useRouter();
     const param = useSearchParams();
+    
 
     const [loading, setLoading] = useState(false); 
     const [contract, setContract] = useState<Contract | null>(null);
     const [proof, setProof] = useState<Proof>();
+    const [showProof, setShowProof] = useState(false);  // 新增狀態管理顯示 proof
     const [product, setProduct] = useState<Product | null>(null);
     const [bid, setBid] = useState<string>('');
+    const [PoseidonHash, setPoseidonHash] = useState<string>();
     
     const accountIndex = param.get('accountIndex');
     const productID = param.get('productID');
     const index = Number(accountIndex);
 
+    const toggleProofDisplay = () => {
+        setShowProof(!showProof);  // 切換顯示或隱藏 proof
+    };
 
     useEffect(() => {
         const loadContract = async () => {
@@ -74,18 +80,16 @@ export default function Home() {
         }
     }, [contract]); // 確保依賴於contract的更新
 
-    const submitBid = async () => {
+    const submit = async () => {
         if (contract && product && bid) {
             setLoading(true);
             try {
                 const random = getRandomNullifier();
-                const PoseidonHash = await generateCommitment(bid, random);
-                const fullProof = await generateFullProof(random, bid, product.startingPrice, PoseidonHash);
+                
+                const Hash = await generateCommitment(bid, random);
+                const fullProof = await generateFullProof(random, bid, product.startingPrice, Hash);
+                setPoseidonHash(Hash);
                 setProof(fullProof);
-                console.log("type:", typeof(productID), productID);
-                const transaction = await contract.summitBid(productID, proof?.proof, proof?.publicSignals,PoseidonHash);
-                await transaction.wait();
-                alert('Bid placed successfully!');
             } catch (error) {
                 console.error("Failed to place bid:", error);
                 alert('Failed to place bid.');
@@ -94,6 +98,29 @@ export default function Home() {
             }
         }
     };
+
+    useEffect(() => {
+        const submitBid = async () => {
+            if (contract && product && bid && proof) {
+                setLoading(true);
+                try {
+                    console.log("type:", typeof(productID), productID);
+                    const transaction = await contract.summitBid(productID, proof.proof, proof.publicSignals, PoseidonHash);
+                    await transaction.wait();
+                    alert('Bid placed successfully!');
+                } catch (error) {
+                    console.error("Failed to place bid:", error);
+                    alert('Failed to place bid.');
+                } finally {
+                    setLoading(false);
+                }
+            }
+        };
+    
+        if (proof && PoseidonHash) {
+            submitBid();
+        }
+    }, [proof, PoseidonHash]);
     
 
     return (
@@ -115,8 +142,28 @@ export default function Home() {
                             placeholder="Your bid"
                             style={{ padding: '10px', fontSize: '16px', marginRight: '10px' }}
                         />
-                        <button onClick={submitBid} style={{ padding: '10px 20px' }}>Submit Bid</button>
+                        <button onClick={submit} style={buttonStyle}>Submit Bid</button>
                     </div>
+                    {proof && (
+                        <button onClick={toggleProofDisplay} className="p-2 bg-blue-500 text-white rounded" style={{ padding: '10px 20px' }}>
+                            {showProof ? 'Hide Proof' : 'Show Proof'}
+                        </button>
+                    )}
+                    {showProof && proof && (
+                    <div style={proofDetailStyle}>
+                        <h2 style={headingStyle}>Proof Details</h2>
+                        <p style={textStyle}>Bid Commitment: {proof.publicSignals}</p>
+                        <br></br>
+                        <div style={proofListStyle}>
+                            <h3 style={subHeadingStyle}>Proof:</h3>
+                            <ul>
+                                {proof.proof.map((element, index) => (
+                                    <li key={index} style={listItemStyle}>{`Proof[${index + 1}]: ${element}`}</li>
+                                ))}
+                            </ul>
+                        </div>
+                    </div>
+                )}
                 </>
             ) : (
                 <p>Product not found</p>
@@ -126,6 +173,40 @@ export default function Home() {
     
     
 }
+
+const proofDetailStyle: React.CSSProperties = {
+    padding: '20px',
+    borderRadius: '8px',
+    backgroundColor: '#f0f0f0', // 淺灰色背景
+    boxShadow: '0 4px 6px rgba(0,0,0,0.15)',
+    marginBottom: '20px',
+};
+
+const headingStyle: React.CSSProperties = {
+    fontSize: '20px',
+    color: '#333',
+    marginBottom: '10px',
+};
+
+const subHeadingStyle: React.CSSProperties = {
+    fontSize: '18px',
+    color: '#444',
+    marginTop: '10px',
+    marginBottom: '5px',
+};
+
+const proofListStyle: React.CSSProperties = {
+    backgroundColor: '#ffffff',
+    borderRadius: '8px',
+    padding: '10px',
+    boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.05)',
+};
+
+const textStyle: React.CSSProperties = {
+    fontSize: '17px',
+    color: '#375',
+    lineHeight: '1.5',
+};
 
 const detailStyle: React.CSSProperties = {
     marginBottom: '15px', 
@@ -140,18 +221,30 @@ const detailStyle: React.CSSProperties = {
 
 const containerStyle: React.CSSProperties = {
     padding: '20px',
-    maxWidth: '800px', // 根據實際需要調整寬度
+    maxWidth: '1000px', // 根據實際需要調整寬度
     margin: '20px auto',
     backgroundColor: '#f8f9fa', // 淺灰色背景
     borderRadius: '8px',
     boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
 };
 
-const listStyle: React.CSSProperties = {
-    listStyleType: 'none', // 移除列表點
-    padding: '0',
-    margin: '10px 0' // 給列表增加垂直邊距
+const buttonStyle: React.CSSProperties = {
+    backgroundColor: '#4CAF50',
+    border: 'none',
+    color: 'white',
+    padding: '15px 32px',
+    textAlign: 'center',
+    textDecoration: 'none',
+    fontSize: '16px',
+    margin: '4px',
+    cursor: 'pointer',
+    borderRadius: '12px',
+    boxShadow: '2px 5px 10px rgba(0,0,0,0.2)',
+    transition: 'all 0.3s',
+    width: '20%', // 控制按鈕的寬度
+    marginTop: '20px' // 增加與上面元素的距離
 };
+
 
 const listItemStyle: React.CSSProperties = {
     padding: '15px 10px', // 增加內邊距
