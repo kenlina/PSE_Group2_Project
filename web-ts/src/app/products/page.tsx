@@ -14,6 +14,7 @@ interface Product {
     // 添加更多根據智慧合約中的定義所需的屬性
 }
 
+
 export default function Home() {
     const router = useRouter();
     const param = useSearchParams();
@@ -78,12 +79,17 @@ export default function Home() {
         }
     }, [contract]); // 確保依賴於contract的更新
 
+    const handleProductClick = (productID: number) => {
+        // 實現導航到商品詳情頁面，假設商品詳情頁面路由是 '/product/[id]'
+        router.push(`/product/?accountIndex=${accountIndex}&productID=${productID}`);
+    };
+
     return (
         <div style={containerStyle}>
         {loading ? <p style={loadingTextStyle}>Loading products...</p> : (
             <ul style={listStyle}>
                 {products.map((product, index) => (
-                    <li key={index} style={listItemStyle}>
+                    <li key={index} style={listItemStyle} onClick={() => handleProductClick(index + 1)}>
                         {product.name} - {product.startingPrice}
                     </li>
                 ))}

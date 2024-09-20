@@ -11,6 +11,10 @@
     cd contracts
     npm install
     ```
+> 如果有更改合約要在contracts目錄下重新編譯合約:
+    ```
+    npx hardhat compile
+    ```
 
 2. 進入 `web-ts` 目錄並安裝依賴：
     ```bash
