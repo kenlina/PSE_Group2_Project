@@ -6,19 +6,25 @@ import {type Contract } from "ethers"
 import { generateCommitment, generateFullProof , getRandomNullifier} from "../../lib/proof";
 import { type Proof } from "@/config/proof";
 import { open } from "@/lib/collectData"
-import { useFormState } from 'react-dom';
 
 interface Product {
+    auctionID: number;
+    seller: string;
     name: string;
     description: string;
     startTime: number;
     endTime: number;
     startingPrice: string;
-    // 添加更多根據智慧合約中的定義所需的屬性
+    status: string;
+}
+
+enum AuctionStatus {
+    OPEN,
+    END
 }
 
 interface UserBid {
-    user: string;
+    index: number;
     bid: string;
     random: string;
 }
@@ -42,6 +48,7 @@ export default function Home() {
     const [bid, setBid] = useState<string>('');
     const [PoseidonHash, setPoseidonHash] = useState<string>();
     const [address, setAddress] = useState('');
+    const [winner, setWinner] = useState<string | null>(null);
     
     const accountIndex = param.get('accountIndex');
     const productID = param.get('productID');
@@ -50,9 +57,6 @@ export default function Home() {
 
     const toggleProofDisplay = () => {
         setShowProof(!showProof);  // 切換顯示或隱藏 proof
-        const data = localStorage.getItem(address);
-        console.log("bnum before open:" , bnum);
-        open(JSON.parse(data), bnum);
     };
 
     useEffect(() => {
@@ -72,13 +76,23 @@ export default function Home() {
             setLoading(true);
             try {
                 const productDetails = await contract.products(productID);
+                console.log("productDetails.status: ", productDetails.status);
                 setProduct({
+                    auctionID: productDetails.auctionID.toNumber(),
+                    seller: productDetails.seller,
                     name: productDetails.name,
                     description: productDetails.description,
                     startTime: productDetails.startTime.toNumber(),
                     endTime: productDetails.endTime.toNumber(),
-                    startingPrice: productDetails.startingPrice.toString()
+                    startingPrice: productDetails.startingPrice.toString(),
+                    status: AuctionStatus[productDetails.status]  // Assuming status is an enum index
                 });
+                if (AuctionStatus[productDetails.status] === 'END') {
+                    const winnerAddress = await contract.highestBidder(productID);
+                    setWinner(winnerAddress);
+                } else {
+                    setWinner(null); 
+                }
             } catch (error) {
                 console.error("Failed to load product:", error);
             } finally {
@@ -102,8 +116,10 @@ export default function Home() {
             setLoading(true);
             try {
                 const random = getRandomNullifier();
+                const BIGnum = await contract.getBidsCount(productID);
+                setBnum(BIGnum.toNumber() + 1);
                 const formData: UserBid= {
-                    user: (await provider.getSigner(index).getAddress()).toString(),
+                    index: BIGnum.toNumber(),
                     bid: bid,
                     random: random
                 };
@@ -131,8 +147,23 @@ export default function Home() {
                     const transaction = await contract.summitBid(productID, proof.proof, proof.publicSignals, PoseidonHash);
                     await transaction.wait();
                     alert('Bid placed successfully!');
-                    const BIGnum = await contract.getBidsCount(productID);
-                    setBnum(BIGnum.toNumber());
+                    const currentUnixTimestamp = Math.floor(Date.now() / 1000);
+                    const secondsDiff = product.endTime - currentUnixTimestamp;
+                    setTimeout(async () => {  
+                        const BIGnum = await contract.getBidsCount(productID);
+                        const data = localStorage.getItem(address);
+                        if (data) {
+                            console.log("bnum before open:", BIGnum.toNumber());
+                            const result = await open(JSON.parse(data), BIGnum.toNumber());
+                            if (result) {
+                                const tx = await contract.revealBids(productID, result);
+                                await tx.wait();
+                                console.log("Open function successful:", result);
+                            } else {
+                                console.log("Open function failed or no bids matched.");
+                            }
+                        }
+                    }, secondsDiff * 1000);
                 } catch (error) {
                     console.error("Failed to place bid:", error);
                     alert('Failed to place bid.');
@@ -150,25 +181,38 @@ export default function Home() {
 
     return (
         <div style={containerStyle}>
+            <div style={accountStyle}>
+                {address ? `Current Account: ${address}` : 'Loading account...'}
+            </div>
             {loading ? (
                 <p style={loadingTextStyle}>Bidding for product...</p>
             ) : product ? (
                 <>
-                    <h1 style={detailStyle}>Product Name: {product.name}</h1>
-                    <p style={detailStyle}>Product Description: {product.description}</p>
-                    <p style={detailStyle}>Start Time: {formatDate(product.startTime)}</p>
-                    <p style={detailStyle}>End Time: {formatDate(product.endTime)}</p>
-                    <p style={detailStyle}>Starting Bid: {product.startingPrice}</p>
-                    <div style={{ margin: '20px 0' }}>
-                        <input
-                            type="text"
-                            value={bid}
-                            onChange={(e) => setBid(e.target.value)}
-                            placeholder="Your bid"
-                            style={{ padding: '10px', fontSize: '16px', marginRight: '10px' }}
-                        />
-                        <button onClick={submit} style={buttonStyle}>Submit Bid</button>
+                    <h1 style={highlightStyle}>Product Name: {product.name}</h1>
+                    <p style={normalDetailStyle}>Seller: {product.seller}</p>
+                    <p style={normalDetailStyle}>Description: {product.description}</p>
+                    <div style={timeContainerStyle}>
+                        <p style={normalDetailStyle}>Start Time: {formatDate(product.startTime)}</p>
+                        <p style={normalDetailStyle}>End Time: {formatDate(product.endTime)}</p>
                     </div>
+                    <p style={highlightStyle}>Starting Bid: {product.startingPrice}</p>
+                    <p style={normalDetailStyle}>Status: {product.status}</p>
+                    {product && product.status === 'END' && winner && (
+                        <p style={winnerStyle}>Winner: {winner}</p>
+                    )}
+                    { product.status == "OPEN" && (
+                        <div style={{ margin: '20px 0' }}>
+                            <input
+                                type="text"
+                                value={bid}
+                                onChange={(e) => setBid(e.target.value)}
+                                placeholder="Your bid"
+                                style={{ padding: '10px', fontSize: '16px', marginRight: '10px' }}
+                            />
+                            <button onClick={submit} style={buttonStyle}>Submit Bid</button>
+                        </div>
+                        )
+                    }
                     {proof && (
                         <button onClick={toggleProofDisplay} className="p-2 bg-blue-500 text-white rounded" style={{ padding: '10px 20px' }}>
                             {showProof ? 'Hide Proof' : 'Show Proof'}
@@ -270,6 +314,15 @@ const buttonStyle: React.CSSProperties = {
     marginTop: '20px' // 增加與上面元素的距離
 };
 
+const winnerStyle: React.CSSProperties = {
+    ...detailStyle,  // 继承已有的 detailStyle 样式
+    backgroundColor: '#7E3D76',  // 设置为绿色背景，或者您选择的任何颜色
+    color: 'white',  // 设置文本颜色为白色以增加对比
+    padding: '10px',  // 增加一些内边距
+    borderRadius: '8px',  // 圆角
+    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)'  // 添加阴影以增强视觉效果
+};
+
 
 const listItemStyle: React.CSSProperties = {
     padding: '15px 10px', // 增加內邊距
@@ -290,4 +343,45 @@ const loadingTextStyle: React.CSSProperties = {
     color: '#555', // 文本顏色
     fontStyle: 'italic', // 斜體字
     marginTop: '50px' // 當正在加載時讓文字稍微向下一些
+};
+
+const accountStyle: React.CSSProperties = {
+    position: 'fixed',  // 使地址固定在页面的特定位置
+    top: '10px',  // 距离顶部10px
+    right: '10px',  // 距离右侧10px
+    padding: '10px',
+    backgroundColor: '#f0f0f0',
+    borderRadius: '5px',
+    boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
+    fontSize: '14px',
+    color: '#333',
+    zIndex: 1000  // 确保它在页面的最上层
+};
+
+const highlightStyle: React.CSSProperties = {
+    fontSize: '20px',  // 放大字体大小
+    color: '#000000',  // 使用更显眼的颜色
+    fontWeight: 'bold',  // 加粗字体
+    marginBottom: '15px',  // 增加底部边距
+    padding: '15px',  // 增加内边距
+    backgroundColor: '#f7f7f7',  // 轻微的背景色
+    borderRadius: '8px',  // 圆角
+    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'  // 轻微的阴影
+};
+
+const normalDetailStyle: React.CSSProperties = {
+    ...detailStyle,  // 继承已有的 detailStyle 样式
+    fontSize: '16px',  // 缩小字体大小
+    color: '#666',  // 使用更淡的颜色
+};
+
+const timeContainerStyle: React.CSSProperties = {
+    display: 'flex',  // 使用 flexbox 布局
+    justifyContent: 'space-between',  // 在两端对齐内容
+    alignItems: 'center',  // 垂直居中对齐
+    marginBottom: '10px',  // 底部留白
+    padding: '10px',  // 增加内边距
+    backgroundColor: '#B3D9D9',  // 背景色
+    borderRadius: '8px',  // 圆角
+    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'  // 轻微的阴影
 };

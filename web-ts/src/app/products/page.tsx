@@ -22,7 +22,8 @@ export default function Home() {
     const [loading, setLoading] = useState(false); 
     const [contract, setContract] = useState<Contract | null>(null);
     const [products, setProducts] = useState<Product[]>([]);
-    
+    const [address, setAddress] = useState('');
+
     const accountIndex = param.get('accountIndex');
     const index = Number(accountIndex);
 
@@ -32,6 +33,8 @@ export default function Home() {
         const loadContract = async () => {
             const loadedContract = await getContract(index);
             setContract(loadedContract);
+            const add =  (await provider.getSigner(index).getAddress()).toString();
+            setAddress(add);
         };
 
         loadContract();
@@ -91,6 +94,9 @@ export default function Home() {
 
     return (
         <div style={containerStyle}>
+            <div style={accountStyle}>
+                {address ? `Current Account: ${address}` : 'Loading account...'}
+            </div>
         {loading ? <p style={loadingTextStyle}>Loading products...</p> : (
             <ul style={listStyle}>
                 {products.map((product, index) => (
@@ -138,4 +144,17 @@ const loadingTextStyle: React.CSSProperties = {
     color: '#555', // 文本顏色
     fontStyle: 'italic', // 斜體字
     marginTop: '50px' // 當正在加載時讓文字稍微向下一些
+};
+
+const accountStyle: React.CSSProperties = {
+    position: 'fixed',  // 使地址固定在页面的特定位置
+    top: '10px',  // 距离顶部10px
+    right: '10px',  // 距离右侧10px
+    padding: '10px',
+    backgroundColor: '#f0f0f0',
+    borderRadius: '5px',
+    boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
+    fontSize: '14px',
+    color: '#333',
+    zIndex: 1000  // 确保它在页面的最上层
 };

@@ -15,19 +15,28 @@ export default function Home() {
     const [startTime, setStartTime] = useState('');
     const [endTime, setEndTime] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
-
+    const [address, setAddress] = useState('');
 
     let contract: any;
     
+    useEffect(() => {
+        const loadAccount = async () => {
+            const add = await provider.getSigner(Number(accountIndex)).getAddress();
+            setAddress(add);
+        };
+
+        loadAccount();
+    }, []);
+
     async function sellProducts(event) {
         event.preventDefault(); // 阻止表單的默認提交行為
         try {
             const index = accountIndex === "" ? 0 : Number(accountIndex);
             contract = await getContract(index);
             const signer = await provider.getSigner(index);
-            const address = await signer.getAddress();
-            console.log("Login signer address:", address);
-    
+            const add = await signer.getAddress();
+            console.log("Login signer address:", add);
+            setAddress(add);
             // 處理日期格式，轉換為 UNIX 時間戳
             const formattedStartTime = Math.floor(new Date(startTime).getTime() / 1000);
             const formattedEndTime = Math.floor(new Date(endTime).getTime() / 1000);
@@ -50,6 +59,9 @@ export default function Home() {
 
     return (
         <div className="p-4 max-w-lg mx-auto">
+            <div style={accountStyle}>
+                {address ? `Current Account: ${address}` : 'Loading account...'}
+            </div>
             {successMessage && <div style={successMessageStyle}>{successMessage}</div>}
             <form onSubmit={sellProducts} style={formStyle}>
             <input
@@ -135,4 +147,17 @@ const successMessageStyle: React.CSSProperties = {
     margin: '10px 0',
     textAlign: 'center',
     fontWeight: 'bold'
+};
+
+const accountStyle: React.CSSProperties = {
+    position: 'fixed',  // 使地址固定在页面的特定位置
+    top: '10px',  // 距离顶部10px
+    right: '10px',  // 距离右侧10px
+    padding: '10px',
+    backgroundColor: '#f0f0f0',
+    borderRadius: '5px',
+    boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
+    fontSize: '14px',
+    color: '#333',
+    zIndex: 1000  // 确保它在页面的最上层
 };
