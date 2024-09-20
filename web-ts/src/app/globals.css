@@ -27,7 +27,27 @@ body {
     .text-balance {
         text-wrap: balance;
     }
-    .custom-shadow { /* 添加自定义阴影 */
+    .custom-shadow { 
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
 }
+
+.fixed-vertical-height {
+    height: 400px; 
+}
+
+@media (max-width: 640px) {
+    .fixed-vertical-height {
+        height: 300px; 
+    }
+}
+
+.center-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center; 
+    align-items: center;     
+    height: 100%;            
+    text-align: center;      
+}
+
