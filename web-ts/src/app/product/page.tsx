@@ -3,7 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { getContract, provider } from '../../lib/ethereum';
 import {type Contract } from "ethers"
-
+import { generateCommitment, generateFullProof , getRandomNullifier} from "../../lib/proof";
+import { type Proof } from "@/config/proof";
 
 interface Product {
     name: string;
@@ -26,12 +27,13 @@ export default function Home() {
 
     const [loading, setLoading] = useState(false); 
     const [contract, setContract] = useState<Contract | null>(null);
+    const [proof, setProof] = useState<Proof>();
+    const [product, setProduct] = useState<Product | null>(null);
+    const [bid, setBid] = useState<string>('');
     
     const accountIndex = param.get('accountIndex');
     const productID = param.get('productID');
     const index = Number(accountIndex);
-    const [product, setProduct] = useState<Product | null>(null);
-    const [bid, setBid] = useState<string>('');
 
 
     useEffect(() => {
@@ -76,7 +78,12 @@ export default function Home() {
         if (contract && product && bid) {
             setLoading(true);
             try {
-                const transaction = await contract.placeBid(productID, { value: 100 });
+                const random = getRandomNullifier();
+                const PoseidonHash = await generateCommitment(bid, random);
+                const fullProof = await generateFullProof(random, bid, product.startingPrice, PoseidonHash);
+                setProof(fullProof);
+                console.log("type:", typeof(productID), productID);
+                const transaction = await contract.summitBid(productID, proof?.proof, proof?.publicSignals,PoseidonHash);
                 await transaction.wait();
                 alert('Bid placed successfully!');
             } catch (error) {
@@ -92,7 +99,7 @@ export default function Home() {
     return (
         <div style={containerStyle}>
             {loading ? (
-                <p style={loadingTextStyle}>Loading product...</p>
+                <p style={loadingTextStyle}>Bidding for product...</p>
             ) : product ? (
                 <>
                     <h1 style={detailStyle}>Product Name: {product.name}</h1>

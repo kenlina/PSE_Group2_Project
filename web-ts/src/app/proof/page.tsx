@@ -1,6 +1,6 @@
 "use client"
 import React, { useState } from 'react';
-import { generateCommitment, generateFullProof } from "../../lib/proof";
+import { generateCommitment, generateFullProof , getRandomNullifier} from "../../lib/proof";
 import { type Proof } from "@/config/proof";
 import { useRouter, useSearchParams } from 'next/navigation';
 
