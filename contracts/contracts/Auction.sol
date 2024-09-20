@@ -48,6 +48,11 @@ contract Auction{
     event BidSubmitted(uint256 auctionId, address bider);
     event AuctionEnded(uint256 auctionId, address winner);
 
+    // 函數來獲取某個產品的出價數量
+    function getBidsCount(uint256 productId) public view returns (uint) {
+        return bids[productId].length;
+    }
+
     function createAuction(string memory _name, string memory _description, uint256 _startTime, uint256 _endTime, uint256 _startingPrice) public returns (uint256){
 
         AuctionCounter++;

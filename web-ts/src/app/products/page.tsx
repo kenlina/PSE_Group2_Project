@@ -26,6 +26,8 @@ export default function Home() {
     const accountIndex = param.get('accountIndex');
     const index = Number(accountIndex);
 
+    
+
     useEffect(() => {
         const loadContract = async () => {
             const loadedContract = await getContract(index);
@@ -35,20 +37,20 @@ export default function Home() {
         loadContract();
     }, []);
 
-    const loadProducts = async () => {
-        if (contract) {
+    const loadProducts = async (currentContract: Contract) => {
+        if (currentContract) {
             setLoading(true);
             try {
-                const auctionCount = await contract.AuctionCounter();
+                const auctionCount = await currentContract.AuctionCounter();
                 const productsList: Product[] = [];
                 for (let i = 1; i <= auctionCount.toNumber(); i++) {
-                    const product = await contract.products(i);
+                    const product = await currentContract.products(i);
                     productsList.push({
                         name: product.name,
                         description: product.description,
                         startTime: product.startTime.toNumber(),
                         endTime: product.endTime.toNumber(),
-                        startingPrice: product.startingPrice.toString() // 轉換為字符串
+                        startingPrice: product.startingPrice.toString()
                     });
                 }
                 setProducts(productsList);
@@ -60,13 +62,13 @@ export default function Home() {
         }
     };
     
+    
 
     useEffect(() => {
         if (contract) {
-            // 定義事件處理函數
             const onAuctionCreated = (auctionId, seller) => {
                 console.log(`Auction Created: ${auctionId} by ${seller}`);
-                loadProducts(); // 每次事件觸發時重新加載商品
+                loadProducts(contract);  // 更新這裡，直接使用當前的 contract 對象
             };
     
             // 監聽事件
@@ -74,10 +76,13 @@ export default function Home() {
     
             // 清理函數
             return () => {
-                contract.off('AuctionCreated', onAuctionCreated);
+                if (contract) {
+                    contract.off('AuctionCreated', onAuctionCreated);
+                }
             };
         }
-    }, [contract]); // 確保依賴於contract的更新
+    }, [contract]);  // 這裡保留 contract 作為依賴
+    
 
     const handleProductClick = (productID: number) => {
         // 實現導航到商品詳情頁面，假設商品詳情頁面路由是 '/product/[id]'

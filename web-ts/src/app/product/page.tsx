@@ -5,6 +5,8 @@ import { getContract, provider } from '../../lib/ethereum';
 import {type Contract } from "ethers"
 import { generateCommitment, generateFullProof , getRandomNullifier} from "../../lib/proof";
 import { type Proof } from "@/config/proof";
+import { open } from "@/lib/collectData"
+import { useFormState } from 'react-dom';
 
 interface Product {
     name: string;
@@ -13,6 +15,12 @@ interface Product {
     endTime: number;
     startingPrice: string;
     // 添加更多根據智慧合約中的定義所需的屬性
+}
+
+interface UserBid {
+    user: string;
+    bid: string;
+    random: string;
 }
 
 const formatDate = (timestamp) => {
@@ -33,23 +41,31 @@ export default function Home() {
     const [product, setProduct] = useState<Product | null>(null);
     const [bid, setBid] = useState<string>('');
     const [PoseidonHash, setPoseidonHash] = useState<string>();
+    const [address, setAddress] = useState('');
     
     const accountIndex = param.get('accountIndex');
     const productID = param.get('productID');
     const index = Number(accountIndex);
+    const [bnum, setBnum] = useState<number>(0);
 
     const toggleProofDisplay = () => {
         setShowProof(!showProof);  // 切換顯示或隱藏 proof
+        const data = localStorage.getItem(address);
+        console.log("bnum before open:" , bnum);
+        open(JSON.parse(data), bnum);
     };
 
     useEffect(() => {
         const loadContract = async () => {
             const loadedContract = await getContract(index);
             setContract(loadedContract);
+            const add =  (await provider.getSigner(index).getAddress()).toString();
+            setAddress(add);
+            console.log("address: ", address);
         };
 
         loadContract();
-    }, []);
+    }, [address]);
 
     const loadProduct = async () => {
         if (contract && productID) {
@@ -77,6 +93,7 @@ export default function Home() {
         if (contract) {
             console.log("productID:",productID);
             loadProduct(); // 每次事件觸發時重新加載商品
+            
         }
     }, [contract]); // 確保依賴於contract的更新
 
@@ -85,7 +102,13 @@ export default function Home() {
             setLoading(true);
             try {
                 const random = getRandomNullifier();
-                
+                const formData: UserBid= {
+                    user: (await provider.getSigner(index).getAddress()).toString(),
+                    bid: bid,
+                    random: random
+                };
+                localStorage.setItem(address, JSON.stringify(formData));
+                console.log("userBid has stored in local storage in :", address);
                 const Hash = await generateCommitment(bid, random);
                 const fullProof = await generateFullProof(random, bid, product.startingPrice, Hash);
                 setPoseidonHash(Hash);
@@ -108,6 +131,8 @@ export default function Home() {
                     const transaction = await contract.summitBid(productID, proof.proof, proof.publicSignals, PoseidonHash);
                     await transaction.wait();
                     alert('Bid placed successfully!');
+                    const BIGnum = await contract.getBidsCount(productID);
+                    setBnum(BIGnum.toNumber());
                 } catch (error) {
                     console.error("Failed to place bid:", error);
                     alert('Failed to place bid.');
