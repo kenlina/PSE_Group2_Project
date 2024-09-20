@@ -1,14 +1,17 @@
 "use client"
 // pages/choose-role.tsx
-import { useRouter } from 'next/navigation'; 
+import { useRouter , useSearchParams } from 'next/navigation'; 
 import React from 'react';
 
 const ChooseRole = () => {
     const router = useRouter();  // 將 useRouter 放在組件函數內部使用
+    const param = useSearchParams();
 
     const handleSelectRole = (role: 'seller' | 'bidder') => {
         console.log(`Selected role: ${role}`);
-        const nextRoute = role === 'seller' ? "/seller" : "/products"; // 確保路徑正確
+        let nextRoute = role === 'seller' ? "/seller" : "/products"; // 確保路徑正確
+        const accountIndex = param.get("accountIndex");
+        nextRoute += "?accountIndex=" + accountIndex;;
         router.push(nextRoute);  // 使用變量導航
     };
 
