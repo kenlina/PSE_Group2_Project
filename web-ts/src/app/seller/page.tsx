@@ -58,106 +58,110 @@ export default function Home() {
     }
 
     return (
-        <div className="p-4 max-w-lg mx-auto">
-            <div style={accountStyle}>
-                {address ? `Current Account: ${address}` : 'Loading account...'}
-            </div>
-            {successMessage && <div style={successMessageStyle}>{successMessage}</div>}
-            <form onSubmit={sellProducts} style={formStyle}>
-            <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Product Name"
-                style={inputStyle}
-            />
-            <input
-                type="text"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Description"
-                style={inputStyle}
-            />
-            <input
-                type="text"
-                value={startingPrice}
-                onChange={(e) => setStartingPrice(e.target.value)}
-                placeholder="Starting Price"
-                style={inputStyle}
-            />
-            <input
-                type="datetime-local"
-                value={startTime}
-                onChange={(e) => setStartTime(e.target.value)}
-                placeholder="Start Time"
-                style={inputStyle}
-            />
-            <input
-                type="datetime-local"
-                value={endTime}
-                onChange={(e) => setEndTime(e.target.value)}
-                placeholder="End Time"
-                style={inputStyle}
-            />
-            <button type="submit" style={buttonStyle}>Create Auction</button>
-        </form>
+        <div className="min-h-screen bg-gray-100 bg-stripes flex flex-col">
+        <style jsx global>{`
+            .bg-stripes {
+                background-image: linear-gradient(
+                    45deg,
+                    #f0f0f0 25%,
+                    transparent 25%,
+                    transparent 50%,
+                    #f0f0f0 50%,
+                    #f0f0f0 75%,
+                    transparent 75%,
+                    transparent
+                );
+                background-size: 20px 20px;
+            }
+        `}</style>
+
+        {/* 固定位置: Account Address */}
+        <div className="fixed top-4 right-4 bg-white bg-opacity-80 backdrop-filter backdrop-blur-lg px-4 py-2 rounded shadow-md text-sm text-gray-800">
+            {address ? `Current Account: ${address}` : 'Loading account...'}
         </div>
+
+        {/* 主內容區域 */}
+        <div className="flex flex-1 items-center justify-center p-4">
+            <div className="w-full max-w-md bg-white p-8 rounded-xl shadow-md">
+                <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">Create a New Auction</h2>
+                
+                {successMessage && (
+                    <div className={`mb-4 text-center py-2 rounded ${successMessage.includes('success') ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                        {successMessage}
+                    </div>
+                )}
+
+                <form onSubmit={sellProducts} className="space-y-4">
+                    <div>
+                        <label htmlFor="name" className="block text-sm font-medium text-gray-700">Product Name</label>
+                        <input
+                            type="text"
+                            id="name"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            required
+                            className="mt-1 block w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                            placeholder="Enter product name"
+                        />
+                    </div>
+                    <div>
+                        <label htmlFor="description" className="block text-sm font-medium text-gray-700">Description</label>
+                        <textarea
+                            id="description"
+                            value={description}
+                            onChange={(e) => setDescription(e.target.value)}
+                            required
+                            className="mt-1 block w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                            placeholder="Enter product description"
+                        ></textarea>
+                    </div>
+                    <div>
+                        <label htmlFor="startingPrice" className="block text-sm font-medium text-gray-700">Starting Price</label>
+                        <input
+                            type="number"
+                            id="startingPrice"
+                            value={startingPrice}
+                            onChange={(e) => setStartingPrice(e.target.value)}
+                            required
+                            className="mt-1 block w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                            placeholder="Enter starting price"
+                            min="0"
+                            step="0.01"
+                        />
+                    </div>
+                    <div>
+                        <label htmlFor="startTime" className="block text-sm font-medium text-gray-700">Start Time</label>
+                        <input
+                            type="datetime-local"
+                            id="startTime"
+                            value={startTime}
+                            onChange={(e) => setStartTime(e.target.value)}
+                            required
+                            className="mt-1 block w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                        />
+                    </div>
+                    <div>
+                        <label htmlFor="endTime" className="block text-sm font-medium text-gray-700">End Time</label>
+                        <input
+                            type="datetime-local"
+                            id="endTime"
+                            value={endTime}
+                            onChange={(e) => setEndTime(e.target.value)}
+                            required
+                            className="mt-1 block w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                        />
+                    </div>
+                    <button
+                        type="submit"
+                        disabled={loading}
+                        className={`w-full py-2 px-4 bg-blue-600 text-white font-semibold rounded-md shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-300 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    >
+                        {loading ? "Creating Auction..." : "Create Auction"}
+                    </button>
+                </form>
+
+            </div>
+        </div>
+    </div>
     );
 }
-
-
-const formStyle: React.CSSProperties = {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '10px', // 間距
-    alignItems: 'center', // 居中對齊
-    justifyContent: 'center'
-};
-
-const inputStyle: React.CSSProperties = {
-    padding: '10px',
-    margin: '5px 0',
-    width: '80%', // 控制寬度
-    border: '2px solid #ccc', // 邊框樣式
-    borderRadius: '8px' // 圓角
-};
-
-const buttonStyle: React.CSSProperties = {
-    backgroundColor: '#4CAF50',
-    border: 'none',
-    color: 'white',
-    padding: '15px 32px',
-    textAlign: 'center',
-    textDecoration: 'none',
-    fontSize: '16px',
-    margin: '4px',
-    cursor: 'pointer',
-    borderRadius: '12px',
-    boxShadow: '2px 5px 10px rgba(0,0,0,0.2)',
-    transition: 'all 0.3s',
-    width: '85%', // 控制按鈕的寬度
-    marginTop: '20px' // 增加與上面元素的距離
-};
-
-const successMessageStyle: React.CSSProperties = {
-    color: 'green',
-    backgroundColor: '#ccffcc',
-    padding: '10px',
-    borderRadius: '5px',
-    margin: '10px 0',
-    textAlign: 'center',
-    fontWeight: 'bold'
-};
-
-const accountStyle: React.CSSProperties = {
-    position: 'fixed',  // 使地址固定在页面的特定位置
-    top: '10px',  // 距离顶部10px
-    right: '10px',  // 距离右侧10px
-    padding: '10px',
-    backgroundColor: '#f0f0f0',
-    borderRadius: '5px',
-    boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
-    fontSize: '14px',
-    color: '#333',
-    zIndex: 1000  // 确保它在页面的最上层
-};

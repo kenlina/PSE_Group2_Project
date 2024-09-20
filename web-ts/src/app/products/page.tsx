@@ -93,7 +93,70 @@ export default function Home() {
     };
 
     return (
-        <div style={containerStyle}>
+        <div className="min-h-screen bg-gray-100 bg-stripes flex flex-col p-4">
+        <style jsx global>{`
+            .bg-stripes {
+                background-image: linear-gradient(
+                    45deg,
+                    #f0f0f0 25%,
+                    transparent 25%,
+                    transparent 50%,
+                    #f0f0f0 50%,
+                    #f0f0f0 75%,
+                    transparent 75%,
+                    transparent
+                );
+                background-size: 20px 20px;
+            }
+        `}</style>
+
+        {/* 固定位置: Account Address */}
+        <div className="fixed top-4 right-4 bg-white bg-opacity-80 backdrop-filter backdrop-blur-lg px-4 py-2 rounded shadow-md text-sm text-gray-800">
+            {address ? `Current Account: ${address}` : 'Loading account...'}
+        </div>
+
+        {/* 主內容區域 */}
+        <div className="flex flex-1 items-center justify-center p-4">
+            <div className="w-full max-w-2xl bg-white p-6 rounded-xl shadow-lg">
+                <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">Auction Products</h2>
+
+
+                {loading ? (
+                    <p className="text-center text-lg text-gray-700">Loading products...</p>
+                ) : (
+                    <>
+                        {products.length === 0 ? (
+                            <p className="text-center text-gray-500">No products available.</p>
+                        ) : (
+                            <ul className="space-y-4">
+                                {products.map((product) => (
+                                    <li
+                                        key={index} onClick={() => handleProductClick(index + 1)}
+                                        className="p-4 border-b last:border-b-0 cursor-pointer hover:bg-gray-100 transition-colors duration-300 flex items-center space-x-4"
+                                    >
+                                        <div>
+                                            <h3 className="text-xl font-semibold text-gray-800">{product.name}</h3>
+                                            <p className="text-gray-600">{product.description}</p>
+                                            <div className="mt-2 flex justify-between items-center">
+                                                <span className="text-green-600 font-bold">${product.startingPrice}</span>
+                                                <span className="text-sm text-gray-500">
+                                                    {new Date(product.startTime * 1000).toLocaleString()} - {new Date(product.endTime * 1000).toLocaleString()}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+                    </>
+                )}
+            </div>
+        </div>
+    </div>
+    );
+}
+
+/*<div style={containerStyle}>
             <div style={accountStyle}>
                 {address ? `Current Account: ${address}` : 'Loading account...'}
             </div>
@@ -106,55 +169,4 @@ export default function Home() {
                 ))}
             </ul>
         )}
-    </div>
-    );
-}
-
-const containerStyle: React.CSSProperties = {
-    padding: '20px',
-    maxWidth: '800px', // 根據實際需要調整寬度
-    margin: '20px auto',
-    backgroundColor: '#f8f9fa', // 淺灰色背景
-    borderRadius: '8px',
-    boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
-};
-
-const listStyle: React.CSSProperties = {
-    listStyleType: 'none', // 移除列表點
-    padding: '0',
-    margin: '10px 0' // 給列表增加垂直邊距
-};
-
-const listItemStyle: React.CSSProperties = {
-    padding: '15px 10px', // 增加內邊距
-    borderBottom: '1px solid #ddd', // 底部邊框線條
-    fontSize: '16px', // 字體大小
-    color: '#333', // 字體顏色
-    transition: 'background-color 0.3s', // 背景色變化動畫
-    cursor: 'pointer', // 鼠標樣式
-    marginBottom: '8px', // 每個項目之間的間隔
-    backgroundColor: '#ffffff', // 設定背景色為白色
-    borderRadius: '5px', // 圓角
-    boxShadow: '0 2px 5px rgba(0,0,0,0.05)' // 添加溫暖色調的陰影
-};
-
-const loadingTextStyle: React.CSSProperties = {
-    textAlign: 'center', // 文本居中
-    fontSize: '18px', // 較大字體大小
-    color: '#555', // 文本顏色
-    fontStyle: 'italic', // 斜體字
-    marginTop: '50px' // 當正在加載時讓文字稍微向下一些
-};
-
-const accountStyle: React.CSSProperties = {
-    position: 'fixed',  // 使地址固定在页面的特定位置
-    top: '10px',  // 距离顶部10px
-    right: '10px',  // 距离右侧10px
-    padding: '10px',
-    backgroundColor: '#f0f0f0',
-    borderRadius: '5px',
-    boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
-    fontSize: '14px',
-    color: '#333',
-    zIndex: 1000  // 确保它在页面的最上层
-};
+    </div>*/
