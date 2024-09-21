@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { getContract, provider } from '../lib/ethereum';
+import Image from 'next/image';
 
 
 export default function Home() {
@@ -77,6 +78,13 @@ export default function Home() {
                                 <p>
                                     Here you can participate in auctions and bid on your favorite items. We use blockchain technology to ensure secure and transparent transactions.
                                 </p>
+                                    <Image 
+                                        src="/zkp.webp" 
+                                        alt="Seller Icon"
+                                        width = {250}
+                                        height= {250} 
+                                        style={{ marginLeft: '130px' }}
+                                    />
                             </div>
                         </div>
                     ) : (
