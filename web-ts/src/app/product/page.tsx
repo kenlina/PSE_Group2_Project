@@ -192,8 +192,8 @@ export default function Home() {
                     <p style={normalDetailStyle}>Seller: {product.seller}</p>
                     <p style={normalDetailStyle}>Description: {product.description}</p>
                     <div style={timeContainerStyle}>
-                        <p style={normalDetailStyle}>Start Time: {formatDate(product.startTime)}</p>
-                        <p style={normalDetailStyle}>End Time: {formatDate(product.endTime)}</p>
+                        <p style={{...normalDetailStyle}}>Start Time: {formatDate(product.startTime)}</p>
+                        <p style={{...normalDetailStyle, ...timeHighlightStyle}}>End Time: {formatDate(product.endTime)}</p>
                     </div>
                     <p style={highlightStyle}>Starting Bid: {product.startingPrice}</p>
                     <p style={normalDetailStyle}>Status: {product.status}</p>
@@ -384,4 +384,14 @@ const timeContainerStyle: React.CSSProperties = {
     backgroundColor: '#B3D9D9',  // 背景色
     borderRadius: '8px',  // 圆角
     boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'  // 轻微的阴影
+};
+
+const timeHighlightStyle: React.CSSProperties = {
+    fontSize: '18px',  // 增大字體大小
+    fontWeight: 'bold',  // 加粗
+    color: '#000',  // 使用深色以增強視覺對比
+    padding: '5px 10px',  // 增加內邊距，讓字體更容易閱讀
+    backgroundColor: '#F0E68C',  // 添加明亮的背景色來突出顯示
+    borderRadius: '5px',  // 添加輕微的圓角
+    boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.15)'  // 添加内阴影以增强深度感
 };

@@ -129,7 +129,7 @@ export default function Home() {
                             <p className="text-center text-gray-500">No products available.</p>
                         ) : (
                             <ul className="space-y-4">
-                                {products.map((product) => (
+                                {products.map((product, index) => (
                                     <li
                                         key={index} onClick={() => handleProductClick(index + 1)}
                                         className="p-4 border-b last:border-b-0 cursor-pointer hover:bg-gray-100 transition-colors duration-300 flex items-center space-x-4"

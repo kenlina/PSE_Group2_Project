@@ -16,8 +16,8 @@ const ChooseRole = () => {
     };
 
     return (
-        <div style={{ display: 'flex', justifyContent: 'center' }}>
-            <button onClick={() => handleSelectRole('seller')} style={buttonStyle}>
+        <div style={containerStyle}>
+            <button onClick={() => handleSelectRole('seller')} style={sellerButtonStyle}>
                 Seller
             </button>
             <button onClick={() => handleSelectRole('bidder')} style={buttonStyle}>
@@ -27,19 +27,32 @@ const ChooseRole = () => {
     );
 };
 
-const buttonStyle: React.CSSProperties = {
-    backgroundColor: '#4CAF50',
-    border: 'none',
-    color: 'white',
-    padding: '15px 32px',
-    textAlign: 'center',
-    textDecoration: 'none',
-    fontSize: '16px',
-    margin: '4px',
-    cursor: 'pointer',
-    borderRadius: '12px',
-    boxShadow: '2px 5px 10px rgba(0,0,0,0.2)',
-    transition: 'all 0.3s'
+export default ChooseRole;
+
+const containerStyle: React.CSSProperties = {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: '60vh', // 使容器佔滿整個視窗高度
+    backgroundColor: '#fffff' // 輕微灰色背景
 };
 
-export default ChooseRole;
+const buttonStyle: React.CSSProperties = {
+    backgroundColor: '#8F4586',
+    border: 'none',
+    color: 'white',
+    padding: '80px 100px', // 增加padding使按鈕更大
+    textAlign: 'center',
+    textDecoration: 'none',
+    fontSize: '35px', // 增大字體大小
+    margin: '40px',
+    cursor: 'pointer',
+    borderRadius: '50px',
+    boxShadow: '3px 6px 12px rgba(0,0,0,0.3)',
+    transition: 'transform 0.3s', // 新增transform過渡效果
+};
+
+const sellerButtonStyle: React.CSSProperties = {
+    ...buttonStyle, // 繼承buttonStyle的所有樣式
+    backgroundColor: '#007979', // 特定於Seller按鈕的背景顏色
+};
