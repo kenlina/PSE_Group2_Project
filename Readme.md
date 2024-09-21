@@ -1,59 +1,59 @@
 # Project content
 
-這個project提供了拍賣合約連結到web app的功能
+This project provides the functionality to link auction contracts to a web app.
+> Check [spec](./spec/spec.md) for more details
 
-## 預處理步驟
+## Preliminary Steps
 
-首先，你需要安裝合約和Web應用的相依性。
+First, you need to install the dependencies for both the contract and the web application.
 
-1. 進入 `contracts` 目錄並安裝依賴：
+1. Enter the `contracts` directory and install dependencies:
     ```bash
     cd contracts
     npm install
     ```
-> 如果有更改合約要在contracts目錄下重新編譯合約:
+> If there are changes to the contract, recompile them in the contracts directory: 
     ```
     npx hardhat compile
     ```
 
-2. 進入 `web-ts` 目錄並安裝依賴：
+2. Enter the `web-ts` directory and install dependencies:
     ```bash
     cd web-ts
     npm install
     ```
 
-## 運行 Web App
+## Running the Web App
 
-接下來，啟動合約節點和佈署合約，然後運行 Web 應用。
+Next, start the contract node and deploy the contract, then run the web application.
 
-### 先開啟合約節點
+### Start the Contract Node First
 
-1. 進入 `contracts` 目錄：
+1. Navigate to the `contracts` directory:
     ```bash
     cd contracts
     ```
 
-2. 啟動 Hardhat 節點：
+2. Launch the Hardhat node:
     ```bash
     npx hardhat node
     ```
 
-3. 在新的終端機視窗，執行以下命令以佈署合約到本地網路：
+3. In a new terminal window, execute the following command to deploy the contract to the local network:
     ```bash
     npx hardhat ignition deploy ./ignition/modules/Auction.js --network localhost
     ```
 
-### 運行 Web 應用
+### Run the Web Application
 
-1. 在另一個終端機視窗，進入 `web-ts` 目錄：
+1. In another terminal window, navigate to the `web-ts` directory:
     ```bash
     cd ../web-ts
     ```
 
-2. 啟動開發服務器：
+2. Start the development server:
     ```bash
     npm run dev
     ```
 
-3. 開啟瀏覽器並訪問 [localhost:3000](http://localhost:3000) 以查看應用。
-
+3. Open a browser and visit [localhost:3000](http://localhost:3000) to view the application.

@@ -2,7 +2,7 @@
 
 ## Introduction
 
-構建出一個零知識拍賣系統，在 Deadline 之前各買家所投標之金額不會被得知(以 commitment 方式提交到 smart contract 上)，但在提交出 commitment 之前必須要證明它提交的金額大於底標，由 smart contract 驗證合法性，在過了 Deadline 之後就必須 open 當初的 commitment 讓 smart contract 決定出得標者(最高標)，再由 smart contract 處理後續的交易過程。
+Construct a zero-knowledge auction system where the bid amounts from buyers are not disclosed before the deadline (submitted to the smart contract via a commitment scheme). Before submitting their commitments, buyers must prove that their bid is above the reserve price. The smart contract will verify the validity of these proofs. After the deadline, the commitments must be opened to allow the smart contract to determine the winner (the highest bidder). The smart contract will then handle the subsequent transaction process.
 
 ![image](./flow.png)
 
@@ -25,59 +25,59 @@
 
 ## Frontend
 
-### 主頁面
+### Main page
 
-提供一個可以讓 User 連接上它以太坊地址的界面
+Provide an interface that allows users to connect to their Ethereum address.
 
-### 連接上後的頁面
+### After connecting
 
-#### 讓 User 選擇要當 Seller 或是 Bidder
+#### Provide a page for users to choose their role ( seller or bidder )
 
--   選擇 Seller 後的頁面
-    -   讓 Seller 可以拍賣商品，必須填入商品名、底標、Deadline
--   選擇 Bidder 後的頁面
-    -   展示出所有現在正在拍賣的商品，選擇任一商品後可以進入對該商品出標的頁面
-    -   再進入特定商品出標的頁面後必須填入出標金額，並產生對該金額的 commitment ，接著產生 zk proof 並將 commitment & proof 提交給後端
+- Page after selecting a Seller
+    -Allows the Seller to auction items, requiring entry of the product name, reserve price, and deadline.
+- Page after selecting a Bidder
+    -Displays all currently ongoing auctions; selecting any item allows entry to the bidding page for that item.
+    -Upon entering the specific item's bidding page, the bidder must enter a bid amount, generate a commitment for that amount, then produce a zk proof, and submit the commitment & proof to the backend.   
 
 ### Bid Commitment computation
 
-在 Client 端先產產出一個 random number 再將出標金額及隨機數 r 一起計算 Hash
+On the client side, first generate a random number, then calculate the hash using the bid amount and the random number r.
 
 ```c=
 commiment = poseidon("Bid amount", r)
 ```
 
-> 隨機數 r 要以某種形式在 Client 端儲存起來不能讓其他方知道，因為它隱藏了出標金額，但目前還不知道要怎麼存
+> The random number r must be stored on the client side in some form that remains undisclosed to others, as it conceals the bid amount, but it is currently unclear how to store it.
 
 ## Backend
 
--   主頁面送出連接以太坊請求後要將此 client 連接到他的以太坊帳戶上
--   如果有 Seller 新增商品後要將該拍賣商品的所有資訊紀錄到合約上讓所有買家可以看到
--   在 User 選擇 Bidder 後的頁面列出現在合約上所有的可競標商品(還未到 Deadline)
--   Bidder 對特定商品出標後要將 commitment & proof 提交到合約上
--   當到 Deadline 時要通知所有出標者請他們 open 他們的金額，並觸發合約上的結標功能讓合約產生得標者
+- After the main page sends a request to connect to Ethereum, this client should be connected to their Ethereum account.
+- If a Seller adds a new product, all the auction item's information should be recorded on the contract so all buyers can see it.
+- After a User selects Bidder, the page lists all the bid-eligible items currently on the contract (that have not yet reached their Deadline).
+- After a Bidder places a bid on a specific item, the commitment & proof should be submitted to the contract.
+- When the Deadline is reached, all bidders should be notified to open their bids, and trigger the contract’s closing function to generate the winner.
 
 ## Smart Contract
 
--   上面需要紀錄所有在拍賣的商品以及所有得出標 commitment 及 proof
--   要有函數接收來自 Seller 的新拍賣商品
--   要有函數來處理對特定商品得出標
--   要有函數可以在 Deadline 後被呼叫用來處理結標，當得到所有該商品的投標金額後(來自當初所有 commitment open 後的金額)決定出最高標，並與得標者進行後續交易
+- The above needs to record all items in auction as well as all the commitments and proofs submitted for bids.
+- There should be a function to receive new auction items from Sellers.
+- There should be a function to process bids for specific items.
+- There should be a function that can be called after the Deadline to handle the closing of bids, deciding the highest bid based on all the bid amounts received (from the amounts revealed after opening all initial commitments) and proceeding with the transaction with the winner.
 
 ## ZK Circuit
 
 ### Private Input
 
--   使用者的隨機數 r
--   使用者得出標金額
+-   User's random number r
+-   User's bid amount
 
 ### Public Input
 
--   底標
+-   Reserve bid
 -   commitment
-    > 產生 commitment 的 Hash funciton 默認是 poseidon
+    > The hash function used to generate the commitment is by default Poseidon.
 
-### 證明內容
+### Proving Content
 
--   出標金額及隨機數 r 所產生出的 Hash 確實等於 commitment
--   該出標金額大於底標
+- The hash generated from the bid amount and random number r indeed equals the commitment.
+- The bid amount is greater than the reserve price.
