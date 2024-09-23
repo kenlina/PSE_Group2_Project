@@ -38,7 +38,17 @@ export default function Home() {
         };
 
         loadContract();
+        console.log("refresh in useEffect");
+        
     }, []);
+
+    useEffect(() => {
+        if(contract){
+            console.log("refresh in products");
+            loadProducts(contract);
+        }
+    }, [contract]);  // 這裡保留 contract 作為依賴
+
 
     const loadProducts = async (currentContract: Contract) => {
         if (currentContract) {
